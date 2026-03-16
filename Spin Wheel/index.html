@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spin Wheel Studio</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- Win overlay: name only -->
+<div id="win-overlay">
+  <span class="win-name" id="win-name">—</span>
+  <button class="win-close" onclick="closeWin()">CONTINUE</button>
+</div>
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════
+     STEP 1 — MODE
+════════════════════════════════════ -->
+<div id="step-1" class="screen active">
+  <div class="logo">
+    <div class="logo-main">SPIN <span>WHEEL</span> STUDIO</div>
+    <div class="logo-sub">CUSTOM · ANIMATED · THREE MODES</div>
+  </div>
+  <div class="progress-dots" id="dots-1"></div>
+  <div class="wizard-card">
+    <div class="wiz-step-label">STEP 1 OF 4</div>
+    <div class="wiz-title">Choose Mode</div>
+    <div class="wiz-desc">How should the wheel behave after each spin?</div>
+    <div class="mode-grid">
+      <div class="mode-card" id="mode-regular" onclick="selectMode('regular')">
+        <span class="mode-icon">🌀</span>
+        <div class="mode-name">REGULAR</div>
+        <div class="mode-tag">Spin freely. Equal chance for every entry.</div>
+      </div>
+      <div class="mode-card" id="mode-elim" onclick="selectMode('elim')">
+        <span class="mode-icon">⚡</span>
+        <div class="mode-name">ELIMINATION</div>
+        <div class="mode-tag">Each spin removes that entry. Last one wins.</div>
+      </div>
+      <div class="mode-card" id="mode-pct" onclick="selectMode('pct')">
+        <span class="mode-icon">📊</span>
+        <div class="mode-name">PERCENTAGE</div>
+        <div class="mode-tag">Set custom % per entry. You choose the odds.</div>
+      </div>
+    </div>
+
+    <!-- Sub-mode picker: visible only when Percentage is selected -->
+    <div id="pct-submode" style="display:none;margin-top:14px;">
+      <div class="submode-label">Also use which style?</div>
+      <div class="submode-row">
+        <div class="submode-btn" id="sub-regular" onclick="selectSubMode('regular')">🌀 Regular</div>
+        <div class="submode-btn" id="sub-elim" onclick="selectSubMode('elim')">⚡ Elimination</div>
+      </div>
+    </div>
+
+    <button class="btn-next" id="btn-1-next" onclick="goStep(2)" disabled>NEXT →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     STEP 2 — HEADING
+════════════════════════════════════ -->
+<div id="step-2" class="screen">
+  <div class="logo">
+    <div class="logo-main">SPIN <span>WHEEL</span> STUDIO</div>
+    <div class="logo-sub">CUSTOM · ANIMATED · THREE MODES</div>
+  </div>
+  <div class="progress-dots" id="dots-2"></div>
+  <div class="wizard-card">
+    <button class="btn-back" onclick="goStep(1)">← BACK</button>
+    <div class="wiz-step-label">STEP 2 OF 4</div>
+    <div class="wiz-title">Wheel Heading</div>
+    <div class="wiz-desc">Give your wheel a title — it will appear at the top of the spin page.</div>
+    <input class="big-input" id="heading-input" maxlength="50"
+      placeholder="e.g.  Who goes first?" autofocus oninput="validateStep2()"/>
+    <button class="btn-next" id="btn-2-next" onclick="goStep(3)" disabled>NEXT →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     STEP 3 — COUNT
+════════════════════════════════════ -->
+<div id="step-3" class="screen">
+  <div class="logo">
+    <div class="logo-main">SPIN <span>WHEEL</span> STUDIO</div>
+    <div class="logo-sub">CUSTOM · ANIMATED · THREE MODES</div>
+  </div>
+  <div class="progress-dots" id="dots-3"></div>
+  <div class="wizard-card">
+    <button class="btn-back" onclick="goStep(2)">← BACK</button>
+    <div class="wiz-step-label">STEP 3 OF 4</div>
+    <div class="wiz-title">How Many Parts?</div>
+    <div class="wiz-desc">Choose the number of slices on your wheel (2 – 20).</div>
+    <div class="num-picker">
+      <button class="num-btn" onclick="changeCount(-1)">−</button>
+      <div class="num-display" id="count-display">6</div>
+      <button class="num-btn" onclick="changeCount(1)">+</button>
+    </div>
+    <div class="num-hint">MIN 2 · MAX 20</div>
+    <button class="btn-next" onclick="goStep(4)">NEXT →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     STEP 4 — NAMES
+════════════════════════════════════ -->
+<div id="step-4" class="screen">
+  <div class="logo">
+    <div class="logo-main">SPIN <span>WHEEL</span> STUDIO</div>
+    <div class="logo-sub">CUSTOM · ANIMATED · THREE MODES</div>
+  </div>
+  <div class="progress-dots" id="dots-4"></div>
+  <div class="wizard-card wide">
+    <button class="btn-back" onclick="goStep(3)">← BACK</button>
+    <div class="names-header">
+      <div>
+        <div class="wiz-step-label">STEP 4 OF 4</div>
+        <div class="wiz-title">Name Each Part</div>
+      </div>
+      <div class="names-badge" id="names-badge">0 / 0</div>
+    </div>
+    <div class="wiz-desc" id="names-desc">Enter a label for each slice. Blanks will be auto-named.</div>
+    <div class="names-grid" id="names-grid"></div>
+    <div class="fill-count" id="fill-count"></div>
+    <!-- Percentage total bar — only shown in pct mode -->
+    <div class="pct-total-bar" id="pct-total-bar" style="display:none">
+      <div class="pct-bar-track"><div class="pct-bar-fill" id="pct-bar-fill" style="width:0%"></div></div>
+      <div class="pct-total-label under" id="pct-total-label">0%</div>
+    </div>
+    <button class="btn-next" id="btn-launch" onclick="goStep(5)">LAUNCH WHEEL →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     STEP 5 — FULL-PAGE SPIN SCREEN
+════════════════════════════════════ -->
+<div id="screen-spin" class="screen">
+
+  <!-- Top bar -->
+  <div class="spin-topbar">
+    <div class="spin-title" id="spin-title">My Wheel</div>
+    <div class="spin-pill" id="spin-pill">🌀 REGULAR</div>
+  </div>
+
+  <!-- The giant centred wheel -->
+  <div class="wheel-stage" id="wheel-stage">
+    <div class="wheel-ptr bouncing" id="spin-ptr">▼</div>
+    <canvas id="spin-canvas" width="600" height="600"></canvas>
+    <div class="spin-hub" id="spin-hub" onclick="triggerSpin()">SPIN</div>
+  </div>
+
+  <!-- Bottom controls strip -->
+  <div class="spin-controls">
+    <div class="result-strip" id="result-strip"></div>
+    <div class="ctrl-row">
+      <button class="btn-spin-go" id="btn-spin-go" onclick="triggerSpin()">SPIN</button>
+      <button class="btn-outline" onclick="newWheel()">NEW WHEEL</button>
+      <button class="btn-outline" id="btn-reset-ctrl" onclick="resetElim()" style="display:none">↺ RESET</button>
+    </div>
+  </div>
+
+  <!-- Elimination tray -->
+  <div class="elim-tray" id="elim-tray">
+    <div class="elim-tray-hdr">PARTICIPANTS</div>
+    <div class="elim-scroll" id="elim-scroll"></div>
+    <button class="btn-reset" onclick="resetElim()">↺ RESET</button>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
